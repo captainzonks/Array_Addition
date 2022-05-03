@@ -1,6 +1,24 @@
+/////////////////////
+// Matthew Barham
+// 2022-05-02
+///////////////////////////////////////////////////////////////////
+// Array Adding
+//
+// Takes input of two large numbers from the user and creates arrays
+// of integers representing both with each array value as a digit.
+// Then adds the two arrays together to create a sum array before printing.
+//
+///////////////////////////////////////////////////////////////////
+
 #include <iostream>
 #include <algorithm>
 
+/**
+ * Simple array reversal algorithm.
+ * @param arr The array.
+ * @param start The first index to begin with sorting.
+ * @param end The last index to end the sorting.
+ */
 void reverse_array(int arr[], size_t start, size_t end) {
     while (start < end) {
         int temp{arr[start]};
@@ -11,151 +29,109 @@ void reverse_array(int arr[], size_t start, size_t end) {
     }
 }
 
-void fill_array_from_string(int *array, const std::string &string) {
+/**
+ * Creates an array from integer values in a passed string and then redirects the provided pointer to its location.
+ * @param array Integer pointer will point to new array.
+ * @param string String of integer values to fill the new array.
+ */
+void fill_array_from_string(int **array, const std::string &string) {
+    int *new_array = new int[string.size()];
     for (size_t i{}; i < string.size(); ++i) {
-        array[i] = static_cast<int>(static_cast<unsigned>(string.at(i))) - 48;
+        new_array[i] = static_cast<int>(static_cast<unsigned>(string.at(i))) - 48;
     }
-}
-
-void
-array_addition(const int *first_array, const size_t &first_size, const int *second_array, const size_t &second_size,
-               int **sum_array) {
-    int *resized_array{nullptr};
-    if (first_size < second_size) {
-        resized_array = new int[second_size]{};
-        for (size_t i{}; i < first_size; ++i) {
-            resized_array[i] = first_array[i];
-            first_array = resized_array;
-        }
-    } else if (second_size < first_size) {
-        resized_array = new int[first_size]{};
-        for (size_t i{}; i < second_size; ++i) {
-            resized_array[i] = second_array[i];
-            second_array = resized_array;
-        }
-    }
-
-    // Print the arrays for debug purposes
-    std::cout << std::endl;
-    for (size_t i{}; i < first_size; ++i) {
-        std::cout << first_array[i];
-    }
-    std::cout << std::endl;
-    for (size_t i{}; i < second_size; ++i) {
-        std::cout << second_array[i];
-    }
-
-    std::string result;
-    int carry{};
-    for (size_t i{}; i < (first_size > second_size ? first_size : second_size) * 2; ++i) {
-        int subtotal{(first_array[i]) + (second_array[i]) + carry};
-        int subanswer{subtotal % 10};
-        carry = subtotal / 10;
-        result += (subanswer);
-        std::cout << std::endl;
-        std::cout << subtotal;
-    }
-    if (carry == 1)
-        result += '1';
-
-    sum_array = new int *[result.size()]{};
-    for (size_t i{}; i < result.size(); ++i) {
-        *sum_array[i] = static_cast<int>(static_cast<unsigned>(result.at(i))) - 48;
-    }
-
-    reverse_array(*sum_array, 0, result.size());
-//    delete[] sum_array;
-}
-
-
-/**
- * EXAMPLE ALGORITH from INTERNET
- * @param num1 First string representing a number
- * @param num2 Second string representing a number
- * @return Resulting string number from addition algorithm
- */
-std::string PaperPencilAlgorithm(std::string num1, std::string num2) {
-    std::reverse(num1.begin(), num1.end());
-    std::reverse(num2.begin(), num2.end());
-    if (num1.size() < num2.size())
-        num1.resize(num2.size(), '0');
-    else if (num2.size() < num1.size())
-        num2.resize(num1.size(), '0');
-    std::string result;
-
-    int carry = 0;
-    for (size_t i = 0; i < num1.size(); ++i) {
-        int subtotal = (num1[i] - '0') + (num2[i] - '0') + carry;
-        int subanswer = subtotal % 10;
-        carry = subtotal / 10;
-        result += (subanswer + '0');
-    }
-    if (carry == 1)
-        result += '1';
-    std::reverse(result.begin(), result.end());
-    return result;
+    *array = new_array;
 }
 
 /**
- * Displays prompts and output (taken from internet)
+ * Adds two large decimal numbers together which are held as values in an array, with each array index
+ * being a single digit. The algorithm is a simple paper-and-pencil method of addition.
+ * @param first_array The first number to be summed.
+ * @param first_size The size of the first array.
+ * @param second_array The second number to be summed.
+ * @param second_size The size of the second array.
  */
-void Display() {
-    std::cout << "Paper and Pencil Algorithm Addition" << std::endl;
-    std::string num1, num2;
-    std::cout << "Enter num 1: " << std::endl;
-    std::cin >> num1;
-    std::cout << "Enter num 2: " << std::endl;
-    std::cin >> num2;
-    std::cout << "Addition is : " + PaperPencilAlgorithm(num1, num2) << std::endl;
-//    system("pause");
-//    system("CLS");
+void sum_arrays(const int *first_array, size_t first_size, const int *second_array, size_t second_size) {
+    size_t sum_array_size{(first_size > second_size ? first_size + 1 : second_size + 1)};
+    int *sum = new int[sum_array_size]{};
 
-    std::cout << "Want to add 2 more numbers? (Y/n)" << std::endl;
-    char c;
-    std::cin >> c;
+    int carry{}, length_counter{};
+    int i{}, j{}, k{}; // declare outside loop to use later.
 
-    if (c == 'Y') {
-//        system("CLS");
-        Display();
+    for (i = static_cast<int>(first_size - 1), j = static_cast<int>(second_size - 1), k =
+            static_cast<int>(sum_array_size) - 1; (i >= 0) && (j >= 0); i--, j--) {
+        int temp;
+        temp = first_array[i] + second_array[j] + carry;
+        carry = 0;
+        k = std::max(i, j);
+        sum[k--] = temp % 10;
+        length_counter++;
+
+        // Carry for next digit?
+        if (temp > 9) {
+            carry = 1;
+        }
     }
+
+    // Only one of the next two loops will do anything.
+    // Add on the numbers that are left over
+    for (; i >= 0; i--) {
+        sum[k--] = first_array[i] + carry;
+        carry = 0;
+        length_counter++;
+    }
+    for (; j >= 0; j--) {
+        sum[k--] = second_array[j] + carry;
+        carry = 0;
+        length_counter++;
+    }
+
+    std::cout << "The sum of your two numbers is: ";
+    for (size_t num{}; num < length_counter; ++num) {
+        std::cout << sum[num];
+    }
+
+    delete[] sum;
 }
 
 int main() {
 
-    std::string entered_number;
-    std::cout << "Enter a number: ";
-    std::cin >> entered_number;
+    bool keep_going{true};
+    while (keep_going) {
+        std::string entered_number;
+        std::cout << "Enter a number: ";
+        std::cin >> entered_number;
 
-    size_t first_size{entered_number.size()};
-    int *first_array{new int[entered_number.size()]{}};
-    fill_array_from_string(first_array, entered_number);
+        size_t first_size{entered_number.size()};
+        int *first_array{nullptr};
+        fill_array_from_string(&first_array, entered_number);
 
-    std::cout << std::endl;
-    std::cout << "Enter a second number: ";
-    std::cin >> entered_number;
+        std::cout << "Enter a second number: ";
+        std::cin >> entered_number;
 
-//    Display();
+        size_t second_size{entered_number.size()};
+        int *second_array{nullptr};
+        fill_array_from_string(&second_array, entered_number);
 
-    size_t second_size{entered_number.size()};
-    int *second_array{new int[entered_number.size()]{}};
-    fill_array_from_string(second_array, entered_number);
+        sum_arrays(first_array, first_size, second_array, second_size);
 
-    // Print the arrays for debug purposes
-    for (size_t i{}; i < first_size; ++i) {
-        std::cout << first_array[i];
+        delete[] first_array;
+        delete[] second_array;
+
+        std::cout << "\nWould you like to add more arrays? (Y or N): ";
+        char answer{};
+        std::cin >> answer;
+        switch (std::tolower(answer)) {
+            case 'y':
+                keep_going = true;
+                break;
+            case 'n':
+                keep_going = false;
+                break;
+            default:
+                std::cout << "Invalid input. Let's keep going." << std::endl;
+                break;
+        }
     }
-    std::cout << std::endl;
-    for (size_t i{}; i < second_size; ++i) {
-        std::cout << second_array[i];
-    }
-
-    int *sum_array{};
-    reverse_array(first_array, 0, first_size - 1);
-    reverse_array(second_array, 0, second_size - 1);
-    array_addition(first_array, first_size, second_array, second_size, &sum_array);
-
-    delete[] first_array;
-    delete[] second_array;
 
     return 0;
 }
